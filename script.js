@@ -1,27 +1,35 @@
-const loadBtn = document.getElementById("loadBtn");
-const postsDiv = document.getElementById("posts");
+const btn = document.getElementById("btn");
+const result = document.getElementById("result");
+const cityInput = document.getElementById("city");
 
-loadBtn.addEventListener("click", function () {
+const API_KEY = "ffbdf21cf031ce6281e5c8f1eb455d81"; 
 
-    postsDiv.innerText = "Loading posts...";
+btn.addEventListener("click", function () {
+    const city = cityInput.value;
 
-    fetch("https://jsonplaceholder.typicode.com/posts")
+    if (city === "") {
+        result.innerText = "Please enter a city name";
+        return;
+    }
+
+    result.innerText = "Loading...";
+
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`)
         .then(response => response.json())
-        .then(posts => {
+        .then(data => {
 
-            postsDiv.innerHTML = "";
+            if (data.cod !== 200) {
+                result.innerText = "City not found!";
+                return;
+            }
 
-            posts.forEach(post => {
-                postsDiv.innerHTML += `
-                    <div class="post">
-                        <h4>${post.title}</h4>
-                        <p>${post.body}</p>
-                    </div>
-                `;
-            });
-
+            result.innerHTML = `
+                <p><b>City:</b> ${data.name}</p>
+                <p><b>Temperature:</b> ${data.main.temp} °C</p>
+                <p><b>Weather:</b> ${data.weather[0].description}</p>
+            `;
         })
-        .catch(error => {
-            postsDiv.innerText = "Failed to load posts!";
+        .catch(() => {
+            result.innerText = "Something went wrong!";
         });
 });
